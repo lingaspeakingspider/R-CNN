@@ -71,20 +71,24 @@ class Selective_Search:
       #Drawing bounding boxes
       os.chdir(self.src_path)
       img = cv.imread(image)
-      with open(self.image + ".txt", "w") as f:
+
+      os.chdir(self.label_dst)
+      name=image.replace(".jpg", "")
+      with open(name + ".txt", "w") as file_oguz:
             pass
+      
       for x1, y1, x2, y2 in boxes:
-         Selective_Search.labeling(self, file=self.image + ".txt", class_idx=class_idx, x1=x1, x2=x2, y1=y1,y2=y2)
+         Selective_Search.labeling(self, file=name + ".txt", class_idx=class_idx, x1=x1, x2=x2, y1=y1,y2=y2)
          img = cv.rectangle(img, (x1, y1), (x2, y2), color=(0,255,0), thickness=1)
 
       #Sending the image to destination path
       os.chdir(self.dst_path)
-      cv.imwrite(image + "(selective).png", img)
+      cv.imwrite(name + "_(selective).jpg", img)
 
       #Controlling
       src_list=os.listdir(self.src_path)
-      if src_list.count(image + ".txt")!=0:
-         os.remove(os.path.join(self.src_path, image + ".txt"))
+      if src_list.count(name + ".txt")!=0:
+         os.remove(os.path.join(self.src_path, name + ".txt"))
 
 
 model=Selective_Search(image=image, src_path=src_path, dst_path=dst_path, label_dst=label_dst)
