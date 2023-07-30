@@ -1,5 +1,6 @@
 from keras.utils import img_to_array
 import numpy as np
+import tensorflow as tf
 from pathlib import Path
 from typing import Dict
 from PIL import Image
@@ -9,6 +10,7 @@ first = second = third = fourth = list()
 first_matrix = second_matrix = third_matrix, fourth_matrix = list()
 dictionary=Dict[str, list]
 first_str = second_str = third_str = fourth_str = list()
+arrays=[]
 
 class RoIPooling2D:
     global first, second, third, fourth  
@@ -47,13 +49,27 @@ class RoIPooling2D:
         the_biggest_values_list=self.max_pooling_phase()
         string_list=self.create_a_list_of_strings(the_biggest_values_list)
 
+        b=0
+        for i in string_list:
+            if b==0:
+                arrays.append(first[i])
 
-        i=0
-        for a in dictionary.items():
-            a[0]=string_list[i]
-            a[1]=the_biggest_values_list[i]
-            i+=1  
-    
+            elif b==1:
+                arrays.append(second[i])
+
+            elif b==2:
+                arrays.append(third[i])
+                
+            else:
+                arrays.append(fourth[i])
+
+            b+=1
+
+        feature_map=np.array([[arrays[0], arrays[1]] , [arrays[2], arrays[3]]])
+        feature_map_tensor=tf.convert_to_tensor(feature_map)
+
+        return feature_map_tensor
+
     def specifying_and_adding_pixels(self, image_array, region_height, region_width, remain_height, remain_width):      
         
         for i2 in range(region_height): #First Part of Region Proposal
@@ -125,23 +141,24 @@ class RoIPooling2D:
     def create_a_list_of_strings(self, list_of_matrixes:list):
         string_list=[]
 
+        a=0
         for i in list_of_matrixes:
             index=list_of_matrixes.index(i)
-            if i==0:
+            if a==0:
                 string=first.index(first_matrix.index(index))
                 string_list.append(string)
 
-            elif i==1:
+            elif a==1:
                 string=second.index(second_matrix.index(index))
                 string_list.append(string)
 
-            elif i==2:
+            elif a==2:
                 string=third.index(third_matrix.index(index))
                 string_list.append(string)
 
             else:
                 string=fourth.index(fourth_matrix.index(index))
                 string_list.append(string)
+            a+=1
 
             return string_list
-        
