@@ -1,4 +1,3 @@
-import numpy as np
 import cv2 as cv
 import os
 from pathlib import Path
@@ -8,7 +7,7 @@ class_names=[]
 
 
 class Selective_Search:
-    def __init__(self, image: str, src_path: Path, dst_path: Path, label_dst: Path, log_file: Path):
+    def __init__(self, image: str, src_path: Path, dst_path: Path, label_dst: Path, log_file: str):
         self.image=image
         self.src_path=src_path
         self.log_file=log_file
@@ -16,15 +15,25 @@ class Selective_Search:
         self.label_dst=label_dst
 
     def logger(self, log_message: str, propagation: bool = True):
-        logger = logging.getLogger("biocally")
-        file_handler = logging.FileHandler(self.log_file)
-        file_handler.setLevel(level=logging.DEBUG)
-        logger.addHandler(file_handler)
+            logger = logging.getLogger("biocally")
+            logger.setLevel(logging.DEBUG)
+            extra={"file_name": self.image}
+            
+            if not logger.handlers:
+                file_handler = logging.FileHandler(self.log_file)
+                file_handler.setLevel(logging.DEBUG)
 
-        logging.info(log_message)
+                
+                formatter = logging.Formatter("%(asctime)s:%(levelname)s:%(name)s:%(file_name)s:%(message)s")
+                file_handler.setFormatter(formatter)
+                logger.addHandler(file_handler)
+    
+            logger.info(log_message, extra=extra)
 
-        if propagation==False:
-            logger.propagate=False
+            if propagation is False:
+                logger.propagate=False
+
+         
 
     def labeling(self, file, class_idx, x, y ,w, h):
       os.chdir(self.label_dst)
@@ -101,6 +110,7 @@ class Selective_Search:
         #Sending the image to destination path
         os.chdir(self.dst_path)
         cv.imwrite(name + "_(selective).jpg", img)
+
         self.logger(log_message=" The image has sent to the destination path.")
 
         #Controlling
@@ -110,7 +120,7 @@ class Selective_Search:
         for i in label_list:
           liste=i.split(".")
           if liste.count("txt")==2:
-            os.remove(os.remove(os.path.join(self.label_dst, i)))
+            os.remove(os.path.join(self.label_dst, i))
 
         self.logger(log_message=" Selective search process has finished succesfully.", propagation=False)
 
@@ -121,9 +131,3 @@ class Selective_Search:
 
             os.chdir(self.label_dst)
             os.remove(os.path.join(self.label_dst, self.log_file))
-
-
-
-
-model = Selective_Search(image="/content/car_IMG_8112.jpg", src_path=os.getcwd(), dst_path="/content/destination", label_dst="/content/labels", log_file="/content/logbey.log")
-model.selective()
